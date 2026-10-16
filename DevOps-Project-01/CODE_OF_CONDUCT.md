@@ -2,86 +2,94 @@
 
 ## Our Pledge
 
-> [!NOTE]
-> We, as members, contributors, and leaders of the **Real-World DevOps/Cloud Projects For Learning by ProDevOpsGuy Tech Community**, pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
->
-> We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+We, as contributors and maintainers of the **Nexora Java Login Application – AWS 3-Tier Architecture Project**, pledge to make participation in this project a welcoming, respectful, and harassment-free experience for everyone.
+
+We welcome contributors regardless of age, disability, ethnicity, gender identity and expression, level of experience, education, nationality, personal appearance, race, religion, or sexual orientation.
+
+We are committed to creating an open, inclusive, collaborative, and healthy learning environment where everyone can contribute, share knowledge, ask questions, and improve their technical skills.
 
 ## Our Standards
 
-> [!IMPORTANT]
-> Examples of behavior that contributes to a positive environment for our community include:
->
-> - **Demonstrating respect and kindness** toward all community members
-> - **Using welcoming and inclusive language**
-> - **Being respectful of differing viewpoints** and experiences
-> - **Gracefully accepting constructive criticism**
-> - **Focusing on what is best for the community**
-> - **Showing empathy** towards other community members
->
-> Examples of unacceptable behavior include:
->
-> - **The use of sexualized language or imagery**, and unwelcome sexual attention or advances
-> - **Trolling, insulting/derogatory comments**, and personal or political attacks
-> - **Public or private harassment**
-> - **Publishing others' private information**, such as a physical or email address, without their explicit permission
-> - **Other conduct** which could reasonably be considered inappropriate in a professional setting
+Examples of behavior that contributes to a positive environment include:
+
+- Demonstrating respect and kindness toward all contributors.
+- Using welcoming and inclusive language.
+- Respecting different viewpoints, backgrounds, and experiences.
+- Accepting constructive feedback professionally.
+- Providing helpful and respectful code reviews.
+- Sharing technical knowledge and supporting beginners.
+- Keeping discussions focused on improving the project.
+- Respecting the privacy and contributions of others.
+
+Examples of unacceptable behavior include:
+
+- Harassment, discrimination, threats, or personal attacks.
+- Insulting, trolling, or deliberately humiliating other contributors.
+- Using sexualized language or unwanted sexual attention.
+- Publishing private or personal information without permission.
+- Making inappropriate comments in issues, pull requests, commits, or discussions.
+- Intentionally disrupting collaboration or misusing project resources.
+- Sharing credentials, access keys, passwords, or other sensitive project information.
 
 ## Enforcement Responsibilities
 
-> [!NOTE]
->
-> _Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful._
->
-> _Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned with this Code of Conduct, and will communicate reasons for moderation decisions when appropriate._
+Project maintainers are responsible for clarifying and enforcing the standards of this Code of Conduct.
+
+Maintainers may remove, edit, or reject comments, commits, code, issues, pull requests, and other contributions that violate these standards. They may also take appropriate corrective action based on the severity and circumstances of the violation.
+
+Where appropriate, maintainers will explain moderation decisions respectfully and fairly.
 
 ## Scope
 
-This Code of Conduct applies within all community spaces, and it also applies when an individual is officially representing the community in public spaces. Examples of representing our community include using an official email address, posting via an official social media account, or acting as an appointed representative at an online or offline event.
+This Code of Conduct applies to all project spaces, including:
+
+- GitHub repositories, issues, and pull requests.
+- Code reviews and project discussions.
+- Documentation and other project-related contributions.
+- Public spaces when an individual is officially representing this project.
 
 ## Enforcement
 
-> [!IMPORTANT]
->
-> Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at **[prodevopsguytech@gmail.com]**. All complaints will be reviewed and investigated promptly and fairly.
->
-> All community leaders are obligated to respect the privacy and security of the reporter of any incident.
+Instances of abusive, harassing, discriminatory, or otherwise unacceptable behavior may be reported through the project's GitHub repository by contacting the maintainers privately.
+
+For private reports, contact the repository owner through the contact information listed on their GitHub profile.
+
+All reports will be reviewed fairly and handled as confidentially as reasonably possible. Information will only be shared when necessary to investigate or address the reported incident.
 
 ## Enforcement Guidelines
 
-> [!CAUTION]
-> Community leaders will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:
->
-> ### 1. Correction
->
-> **Community Impact:** Use of inappropriate language or other behavior deemed unprofessional or unwelcome in the community.
->
-> **Consequence:** A private, written warning from community leaders, providing clarity around the nature of the violation and an explanation of why the behavior was inappropriate. A public apology may be requested.
+Project maintainers may apply the following measures depending on the severity and circumstances of a violation.
 
-> [!WARNING]
->
-> ### 2. Warning
->
-> **Community Impact:** A violation through a single incident or series of actions.
->
-> **Consequence:** A warning with consequences for continued behavior. No interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, for a specified period of time. This includes avoiding interactions in community spaces as well as external channels like social media. Violating these terms may lead to a temporary or permanent ban.
+### 1. Correction
 
-> [!CAUTION]
->
-> ### 3. Temporary Ban
->
-> **Community Impact:** A serious violation of community standards, including sustained inappropriate behavior.
->
-> **Consequence:** A temporary ban from any sort of interaction or public communication with the community for a specified period of time. No public or private interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, is allowed during this period. Violating these terms may lead to a permanent ban.
->
-> ### 4. Permanent Ban
->
-> **Community Impact:** Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an individual, or aggression toward or disparagement of classes of individuals.
->
-> **Consequence:** A permanent ban from any sort of public interaction within the community.
+**Impact:** Minor inappropriate language or behavior.
+
+**Consequence:** A private warning explaining the issue and requesting that the behavior stop.
+
+### 2. Warning
+
+**Impact:** A violation through a single incident or repeated inappropriate behavior.
+
+**Consequence:** A formal warning and restrictions on interactions with affected contributors or project spaces. Further violations may result in a temporary or permanent ban.
+
+### 3. Temporary Ban
+
+**Impact:** Serious or repeated violations of project standards.
+
+**Consequence:** Temporary suspension from participating in project discussions, contributions, or other project activities.
+
+### 4. Permanent Ban
+
+**Impact:** A sustained pattern of violations, harassment, threats, or other serious misconduct.
+
+**Consequence:** Permanent removal from participation in the project and its associated spaces.
 
 ## Attribution
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.0, available at <https://www.contributor-covenant.org/version/2/0/code_of_conduct.html>.
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 2.0.
 
-For answers to common questions about this code of conduct, see <https://www.contributor-covenant.org/faq>.
+The original version is available at:
+https://www.contributor-covenant.org/version/2/0/code_of_conduct.html
+
+For answers to common questions, see:
+https://www.contributor-covenant.org/faq
