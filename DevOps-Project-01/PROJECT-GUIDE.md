@@ -1,546 +1,426 @@
-﻿# Deploy Java Application on AWS 3-Tier Architecture
-
-![AWS Architecture](https://imgur.com/b9iHwVc.png)
+﻿# Nexora Java Login Application – Project Guide
 
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
 2. [Architecture Overview](#architecture-overview)
-3. [Pre-Requisites](#pre-requisites)
-4. [Infrastructure Setup](#infrastructure-setup)
-   - [VPC and Networking](#vpc-and-networking)
-   - [Security Configuration](#security-configuration)
-   - [Database Layer](#database-layer)
-5. [Application Setup](#application-setup)
-   - [Build Environment](#build-environment)
-   - [Application Deployment](#application-deployment)
-   - [Load Balancing and Auto Scaling](#load-balancing-and-auto-scaling)
-6. [Monitoring and Maintenance](#monitoring-and-maintenance)
+3. [Prerequisites](#prerequisites)
+4. [AWS Infrastructure](#aws-infrastructure)
+5. [Application Build and Configuration](#application-build-and-configuration)
+6. [AWS Deployment](#aws-deployment)
 7. [Security Best Practices](#security-best-practices)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Contributing](#contributing)
+8. [Monitoring and Maintenance](#monitoring-and-maintenance)
+9. [Troubleshooting](#troubleshooting)
+10. [Cost Management](#cost-management)
+11. [Related Documentation](#related-documentation)
+12. [Contributing](#contributing)
 
 ---
 
-![3-tier Architecture Diagram](https://imgur.com/3XF0tlJ.png)
+## Project Overview
 
----
+### Introduction
 
-# Project Overview
+The Nexora Java Login Application is a Java web application deployed on AWS using a three-tier architecture.
 
-## Introduction
+This project demonstrates how to deploy a Java application, configure web and application servers, connect to a managed MySQL database, and apply network security practices in AWS.
 
-This project demonstrates the deployment of a production-grade Java web application using AWS's robust 3-tier architecture. The implementation follows cloud-native best practices, ensuring high availability, scalability, and security across all application tiers.
+The project is intended for learning and demonstrating AWS, Java application deployment, Linux administration, networking, and DevOps concepts.
 
-### Key Features
+### Project Objectives
 
-- **High Availability**: Multi-AZ deployment with automated failover
-- **Auto Scaling**: Dynamic resource allocation based on demand
-- **Security**: Defense-in-depth approach with multiple security layers
-- **Monitoring**: Comprehensive logging and monitoring setup
-- **Cost Optimization**: Efficient resource utilization and management
+- Deploy a Java web application on AWS EC2.
+- Use an Application Load Balancer (ALB) to receive incoming web traffic.
+- Configure Nginx as a reverse proxy on the web tier.
+- Run the Java application on a private application-tier EC2 instance.
+- Connect the application to Amazon RDS for MySQL.
+- Manage the application using `systemd`.
+- Store database configuration in environment variables instead of committing credentials to Git.
+- Understand AWS networking, security groups, troubleshooting, and cost management.
 
 ## Architecture Overview
 
-### Infrastructure Components
+### Three-Tier Architecture
 
-1. **Presentation Tier (Frontend)**
-   - Nginx web servers in Auto Scaling Group
-   - Public-facing Network Load Balancer
-   - CloudFront Distribution for static content
+The deployment uses the following request flow:
 
-2. **Application Tier (Backend)**
-   - Apache Tomcat servers in Auto Scaling Group
-   - Internal Network Load Balancer
-   - Session management with Amazon ElastiCache
+```text
+                         Users
+                           |
+                           v
+               Application Load Balancer
+                           |
+                           v
+                  Public Web EC2
+                       Nginx
+                           |
+                           v
+                  Private App EC2
+                Spring Boot Java WAR
+                  systemd service
+                           |
+                           v
+                  Private Amazon RDS
+                       MySQL
+```
 
-3. **Data Tier**
-   - Amazon RDS MySQL in Multi-AZ configuration
-   - Automated backups and point-in-time recovery
-   - Read replicas for read-heavy workloads
+### Architecture Components
 
-### Network Architecture
+| Component | Purpose |
+|---|---|
+| Amazon VPC | Provides the network environment for the deployment. |
+| Application Load Balancer | Receives HTTP requests and forwards them to the web tier. |
+| Public Web EC2 | Runs Nginx as the reverse proxy. |
+| Private App EC2 | Runs the Java application on port 8080. |
+| Amazon RDS for MySQL | Stores application data in a managed relational database. |
+| Security Groups | Control permitted traffic between the tiers. |
+| systemd | Starts and manages the Java application service. |
+| CloudWatch and SNS | Can be used for monitoring and notifications where configured. |
 
-- **VPC Design**
-  - Two separate VPCs (192.168.0.0/16 and 172.32.0.0/16)
-  - Public and private subnets across multiple AZs
-  - Transit Gateway for inter-VPC communication
+**Important:** This guide documents the implemented deployment. Auto Scaling, CloudFront, NAT Gateway, Multi-AZ database deployment, and additional high-availability components are not assumed to be configured.
 
-# Pre-Requisites
+## Prerequisites
 
-## Required Accounts and Tools
+Before working with the project, prepare the following:
 
-### 1. AWS Account Setup
-- Create an [AWS Free Tier Account](https://aws.amazon.com/free/)
-- Install AWS CLI v2
-  ```bash
-  # For Linux
-  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  unzip awscliv2.zip
-  sudo ./aws/install
+- An AWS account with permission to manage the required resources.
+- Git installed on your development machine.
+- Java and Maven, or the project's Maven Wrapper.
+- A Windows PowerShell terminal or Linux shell.
+- SSH access to EC2 where required.
+- Basic knowledge of AWS EC2, VPC, security groups, Linux, Java, and MySQL.
 
-  # For macOS
-  brew install awscli
+### Verify Local Tools
 
-  # Configure AWS CLI
-  aws configure
-  ```
+In Windows PowerShell:
 
-### 2. Development Tools
-- **Git**: Version control system
-  ```bash
-  # For Linux
-  sudo apt-get update
-  sudo apt-get install git
+```powershell
+git --version
+java -version
+docker --version
+```
 
-  # For macOS
-  brew install git
-  ```
+Check the Maven Wrapper from the application directory:
 
-### 3. CI/CD Integration
-- **SonarCloud Account**
-  - Sign up at [SonarCloud](https://sonarcloud.io/)
-  - Generate authentication token
-  - Configure project settings:
-    ```bash
-    # Add to pom.xml
-    <properties>
-        <sonar.projectKey>your_project_key</sonar.projectKey>
-        <sonar.organization>your_organization</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    </properties>
-    ```
+```powershell
+cd D:\DevOps-Projects\DevOps-Project-01\Project-01-Java-Login-App
+.\mvnw.cmd -version
+```
 
-- **JFrog Artifactory**
-  - Create account on [JFrog Cloud](https://jfrog.com/start-free/)
-  - Set up Maven repository
-  - Configure authentication:
-    ```xml
-    <!-- settings.xml -->
-    <servers>
-        <server>
-            <id>jfrog-artifactory</id>
-            <username>${env.JFROG_USERNAME}</username>
-            <password>${env.JFROG_PASSWORD}</password>
-        </server>
-    </servers>
-    ```
+Docker is useful for container-based workflows but is not required to run the deployed application as a `systemd` service on EC2.
 
-# Infrastructure Setup
+## AWS Infrastructure
 
-## VPC and Networking
+### Region
 
-### 1. VPC Creation
+The project deployment is in:
+
+```text
+us-east-1
+```
+
+### Network Layout
+
+The architecture separates the public web tier from the private application and database tiers.
+
+- The ALB receives user requests.
+- The web EC2 instance runs Nginx.
+- The application EC2 instance runs the Java service on port 8080.
+- The RDS MySQL database accepts connections only from authorized sources.
+
+### Security Group Traffic
+
+| Source | Destination | Port | Purpose |
+|---|---|---:|---|
+| Internet | ALB | 80/443, as configured | Web access |
+| ALB security group | Web EC2 security group | 80 | Forward web requests |
+| Web EC2 security group | App EC2 security group | 8080 | Forward requests to Java |
+| App EC2 security group | RDS security group | 3306 | Database connectivity |
+| Authorized administrator IP | EC2 | 22, if required | SSH administration |
+
+Configure only the ports needed by the actual deployment. Do not expose the application port or database port directly to the public internet.
+
+### Database Configuration
+
+The application connects to Amazon RDS for MySQL using environment variables:
+
+- `DB_URL` — JDBC connection URL.
+- `DB_USERNAME` — database username.
+- `DB_PASSWORD` — database password.
+
+Do not commit actual passwords, AWS access keys, private keys, or other credentials to Git.
+
+## Application Build and Configuration
+
+### 1. Open the Application Directory
+
+```powershell
+cd D:\DevOps-Projects\DevOps-Project-01\Project-01-Java-Login-App
+```
+
+### 2. Build the Application
+
+```powershell
+.\mvnw.cmd clean package
+```
+
+The expected WAR artifact is:
+
+```text
+target\dptweb-1.0.war
+```
+
+Check that the WAR exists:
+
+```powershell
+Test-Path .\target\dptweb-1.0.war
+```
+
+Expected result:
+
+```text
+True
+```
+
+If the build fails, review the Maven error output and resolve compilation, dependency, or test issues before deployment.
+
+### 3. Configure Database Environment Variables
+
+Configure the following variables in the appropriate runtime environment:
+
+```text
+DB_URL=jdbc:mysql://<RDS-ENDPOINT>:3306/UserDB
+DB_USERNAME=<DATABASE-USERNAME>
+DB_PASSWORD=<DATABASE-PASSWORD>
+```
+
+Replace the placeholders with the correct values for your environment.
+
+These are configuration examples, not credentials to commit into the repository. Use an appropriately protected service environment file or a secrets-management solution, and restrict access to it.
+
+### 4. Verify the Application Configuration
+
+Confirm that the Spring application reads the environment variables rather than relying on credentials hardcoded in source files.
+
+Check that:
+
+- The JDBC URL points to the intended database.
+- The database name is correct.
+- The database user has the required permissions.
+- The RDS security group permits connections from the application tier.
+- The Java runtime is compatible with the application build.
+
+## AWS Deployment
+
+### 1. Verify the Web Tier
+
+Connect to the public web EC2 instance and check Nginx:
+
 ```bash
-# Create primary VPC
-aws ec2 create-vpc \
-    --cidr-block 192.168.0.0/16 \
-    --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=PrimaryVPC}]' \
-    --region us-east-1
-
-# Create secondary VPC
-aws ec2 create-vpc \
-    --cidr-block 172.32.0.0/16 \
-    --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=SecondaryVPC}]' \
-    --region us-east-1
+sudo systemctl status nginx --no-pager
+sudo nginx -t
 ```
 
-### 2. Subnet Configuration
+If configuration changes are required, test them before reloading Nginx:
+
 ```bash
-# Create public subnet
-aws ec2 create-subnet \
-    --vpc-id vpc-xxx \
-    --cidr-block 192.168.1.0/24 \
-    --availability-zone us-east-1a \
-    --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=PublicSubnet1}]'
-
-# Create private subnet
-aws ec2 create-subnet \
-    --vpc-id vpc-xxx \
-    --cidr-block 192.168.2.0/24 \
-    --availability-zone us-east-1b \
-    --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=PrivateSubnet1}]'
+sudo systemctl reload nginx
 ```
 
-### 3. Gateway Setup
+The Nginx reverse proxy should forward requests to the private application instance on port 8080.
+
+### 2. Verify the Application Tier
+
+Connect to the private application EC2 instance using your approved access method.
+
+Check the service:
+
 ```bash
-# Create and attach Internet Gateway
-aws ec2 create-internet-gateway
-aws ec2 attach-internet-gateway --vpc-id vpc-xxx --internet-gateway-id igw-xxx
-
-# Create NAT Gateway
-aws ec2 create-nat-gateway \
-    --subnet-id subnet-xxx \
-    --allocation-id eipalloc-xxx \
-    --tag-specifications 'ResourceType=natgateway,Tags=[{Key=Name,Value=PrimaryNATGateway}]'
+sudo systemctl status java-login-app.service --no-pager
 ```
 
-## Security Configuration
+Confirm whether it starts automatically:
 
-### 1. Security Groups
 ```bash
-# Create frontend security group
-aws ec2 create-security-group \
-    --group-name FrontendSG \
-    --description "Security group for frontend servers" \
-    --vpc-id vpc-xxx
-
-# Allow inbound HTTP/HTTPS
-aws ec2 authorize-security-group-ingress \
-    --group-id sg-xxx \
-    --protocol tcp \
-    --port 80 \
-    --cidr 0.0.0.0/0
-
-aws ec2 authorize-security-group-ingress \
-    --group-id sg-xxx \
-    --protocol tcp \
-    --port 443 \
-    --cidr 0.0.0.0/0
+sudo systemctl is-enabled java-login-app.service
 ```
 
-### 2. IAM Roles and Policies
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject"
-            ],
-            "Resource": "arn:aws:s3:::your-bucket/*"
-        }
-    ]
-}
-```
+Review application logs:
 
-## Database Layer
-
-### 1. RDS Instance Creation
 ```bash
-aws rds create-db-instance \
-    --db-instance-identifier prod-mysql \
-    --db-instance-class db.t3.medium \
-    --engine mysql \
-    --master-username admin \
-    --master-user-password "YourSecurePassword" \
-    --allocated-storage 20 \
-    --multi-az \
-    --vpc-security-group-ids sg-xxx \
-    --db-subnet-group-name your-db-subnet-group
+sudo journalctl -u java-login-app.service -n 100 --no-pager
 ```
 
-### 2. Database Initialization
-```sql
--- Connect to database
-mysql -h your-rds-endpoint -u admin -p
+Follow new log entries when troubleshooting:
 
--- Create application database
-CREATE DATABASE javaapp;
-USE javaapp;
-
--- Create users table
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create necessary indexes
-CREATE INDEX idx_username ON users(username);
-CREATE INDEX idx_email ON users(email);
-```
-
-# Application Setup
-
-## Build Environment
-
-### 1. Maven Configuration
-```xml
-<!-- pom.xml -->
-<project>
-    <properties>
-        <java.version>11</java.version>
-        <spring.version>2.5.12</spring.version>
-    </properties>
-
-    <dependencies>
-        <!-- Add your dependencies here -->
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-```
-
-### 2. Build Process
 ```bash
-# Clean and build project
-mvn clean package -DskipTests
-
-# Run tests
-mvn test
-
-# Deploy to JFrog
-mvn deploy
+sudo journalctl -u java-login-app.service -f
 ```
 
-## Application Deployment
+### 3. Verify Database Connectivity
 
-### 1. Tomcat Configuration
+From the application tier, check whether the RDS endpoint is reachable on port 3306:
+
 ```bash
-# Create tomcat.service
-sudo tee /etc/systemd/system/tomcat.service << EOF
-[Unit]
-Description=Apache Tomcat Web Application Container
-After=network.target
-
-[Service]
-Type=forking
-Environment=JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
-Environment=CATALINA_HOME=/opt/tomcat
-Environment=CATALINA_BASE=/opt/tomcat
-Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
-Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
-
-ExecStart=/opt/tomcat/bin/startup.sh
-ExecStop=/opt/tomcat/bin/shutdown.sh
-
-User=tomcat
-Group=tomcat
-UMask=0007
-RestartSec=10
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
+nc -vz <RDS-ENDPOINT> 3306
 ```
 
-### 2. Nginx Configuration
-```nginx
-# /etc/nginx/conf.d/app.conf
-upstream backend {
-    server internal-nlb-xxx.elb.amazonaws.com:8080;
-}
+If the command is unavailable, use an approved network diagnostic tool.
 
-server {
-    listen 80;
-    server_name example.com;
+Network connectivity alone does not prove that database authentication or SQL operations work. Verify the application logs and database configuration as well.
 
-    location / {
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
+### 4. Verify the Load Balancer
 
-    location /static/ {
-        proxy_pass https://your-cloudfront-distribution.cloudfront.net;
-    }
-}
+In the AWS Management Console:
+
+1. Open EC2 and select **Load Balancers**.
+2. Select the project's Application Load Balancer.
+3. Review its listeners and target group.
+4. Check target health.
+5. Open the application's configured public URL and verify that the expected page loads.
+
+For detailed deployment instructions and the current Nginx configuration, refer to `docs/AWS-3-Tier-Deployment.md`.
+
+## Security Best Practices
+
+### Network Security
+
+- Keep the application EC2 and RDS database in private subnets where configured.
+- Restrict SSH to trusted administrator IP addresses.
+- Permit application traffic only from the intended web tier.
+- Permit MySQL traffic only from the application tier.
+- Do not expose database credentials or private infrastructure configuration unnecessarily.
+
+### Application Security
+
+- Read database credentials from protected environment variables or a secrets manager.
+- Use parameterized SQL queries and validate user input.
+- Avoid logging passwords, session tokens, or other sensitive data.
+- Keep Java, application dependencies, and operating-system packages updated.
+- Review authentication, session handling, and error handling before production use.
+
+### Repository Security
+
+Before committing changes:
+
+```powershell
+git diff --check
+git status -sb
 ```
 
-## Load Balancing and Auto Scaling
+Review the staged changes before committing. Never commit `.env` files containing real credentials, private keys, or AWS secrets.
 
-### 1. Launch Template Configuration
+If credentials are exposed, revoke or rotate them immediately. Removing a secret from the latest commit does not necessarily remove it from Git history.
+
+For reporting security issues, refer to `SECURITY.md`.
+
+## Monitoring and Maintenance
+
+### Service Health
+
+Check the Java application:
+
 ```bash
-aws ec2 create-launch-template \
-    --launch-template-name WebServerTemplate \
-    --version-description WebServerVersion1 \
-    --launch-template-data '{
-        "ImageId": "ami-xxx",
-        "InstanceType": "t3.micro",
-        "SecurityGroupIds": ["sg-xxx"],
-        "UserData": "IyEvYmluL2Jhc2gKCiMgSW5zdGFsbCBOZ2lueApzdWRvIHl1bSBpbnN0YWxsIG5naW54IC15Cg=="
-    }'
+sudo systemctl is-active java-login-app.service
 ```
 
-### 2. Auto Scaling Group
+Check Nginx:
+
 ```bash
-aws autoscaling create-auto-scaling-group \
-    --auto-scaling-group-name WebServerASG \
-    --launch-template LaunchTemplateName=WebServerTemplate,Version='$Latest' \
-    --min-size 2 \
-    --max-size 6 \
-    --desired-capacity 2 \
-    --vpc-zone-identifier "subnet-xxx,subnet-yyy" \
-    --target-group-arns "arn:aws:elasticloadbalancing:region:account-id:targetgroup/your-target-group/xxx" \
-    --health-check-type ELB \
-    --health-check-grace-period 300
+sudo systemctl is-active nginx
 ```
 
-# Monitoring and Maintenance
+Review logs when a service fails, restarts unexpectedly, or returns errors.
 
-## CloudWatch Setup
+### AWS Monitoring
 
-### 1. Metrics Configuration
+Where configured, use Amazon CloudWatch to review EC2 metrics, application logs, load balancer health, and RDS performance.
+
+Amazon SNS can be used to send notifications from configured alarms.
+
+Do not assume that a metric, log group, alarm, or notification is active until it has been verified in the AWS account.
+
+### Maintenance Checklist
+
+- Verify the public application URL.
+- Check the health of the ALB targets.
+- Check Nginx and Java service status.
+- Review application errors and database connectivity.
+- Review security group rules.
+- Review AWS costs and unused resources.
+- Keep deployment and troubleshooting documentation updated.
+
+## Troubleshooting
+
+| Problem | What to check |
+|---|---|
+| Website does not open | ALB listener, target health, web EC2 status, Nginx service, and security groups. |
+| ALB target is unhealthy | Target group health-check path and port, Nginx availability, and web-tier connectivity. |
+| Nginx returns 502 Bad Gateway | Private app IP, port 8080, Java service status, and web-to-app security group rules. |
+| Java application fails to start | `systemctl` status, `journalctl` logs, Java runtime, WAR file, and environment variables. |
+| Database connection fails | RDS endpoint, port 3306, database credentials, database name, and security group rules. |
+| Login or database operation fails | Application logs, SQL query handling, schema, and database permissions. |
+| Service does not start after reboot | `systemctl is-enabled java-login-app.service` and the service configuration. |
+
+### Useful Commands
+
 ```bash
-# Create custom metric for memory usage
-cat << EOF > /opt/aws/scripts/memory-metrics.sh
-#!/bin/bash
-MEMORY_USAGE=\$(free | grep Mem | awk '{print \$3/\$2 * 100.0}')
-aws cloudwatch put-metric-data \
-    --metric-name MemoryUsage \
-    --namespace CustomMetrics \
-    --value \$MEMORY_USAGE \
-    --dimensions InstanceId=\$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-EOF
+# Java service
+sudo systemctl status java-login-app.service --no-pager
 
-# Add to crontab
-echo "* * * * * /opt/aws/scripts/memory-metrics.sh" | crontab -
-```
+# Java service logs
+sudo journalctl -u java-login-app.service -n 100 --no-pager
 
-### 2. Log Management
-```bash
-# Configure CloudWatch agent
-cat << EOF > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-{
-    "agent": {
-        "metrics_collection_interval": 60,
-        "run_as_user": "root"
-    },
-    "logs": {
-        "logs_collected": {
-            "files": {
-                "collect_list": [
-                    {
-                        "file_path": "/opt/tomcat/logs/catalina.out",
-                        "log_group_name": "/aws/tomcat/application",
-                        "log_stream_name": "{instance_id}",
-                        "timezone": "UTC"
-                    }
-                ]
-            }
-        }
-    },
-    "metrics": {
-        "metrics_collected": {
-            "mem": {
-                "measurement": [
-                    "mem_used_percent"
-                ]
-            },
-            "swap": {
-                "measurement": [
-                    "swap_used_percent"
-                ]
-            }
-        }
-    }
-}
-EOF
-```
+# Nginx configuration
+sudo nginx -t
 
-# Security Best Practices
+# Nginx service
+sudo systemctl status nginx --no-pager
 
-## 1. Network Security
-- Implement network ACLs
-- Use security groups effectively
-- Enable VPC Flow Logs
-- Configure AWS WAF
+# Listening ports
+sudo ss -lntp
 
-## 2. Application Security
-- Regular security patches
-- Implement AWS Shield
-- Use AWS Secrets Manager
-- Enable AWS GuardDuty
-
-## 3. Data Security
-- Enable encryption at rest
-- Use SSL/TLS for data in transit
-- Regular security audits
-- Implement backup strategies
-
-# Troubleshooting Guide
-
-## Common Issues and Solutions
-
-### 1. Connection Issues
-```bash
-# Check connectivity
-telnet database-endpoint 3306
-
-# Verify security group rules
-aws ec2 describe-security-groups --group-ids sg-xxx
-
-# Test load balancer health
-aws elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:region:account-id:targetgroup/your-target-group/xxx
-```
-
-### 2. Performance Issues
-```bash
-# Check CPU usage
-top -bn1
-
-# Monitor memory usage
-free -m
-
-# Check disk usage
+# Disk usage
 df -h
 
-# Monitor Tomcat threads
-ps -eLf | grep java | wc -l
+# Memory usage
+free -m
 ```
 
-# Contributing
+## Cost Management
 
-## How to Contribute
+AWS resources can continue generating charges while running, even if the application is not being used.
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+- Review EC2, RDS, ALB, EBS, and other active resource charges.
+- Stop or delete resources that are no longer needed, where appropriate.
+- Check for unattached Elastic IPs, unused volumes, snapshots, and other billable resources.
+- Take required backups before deleting resources.
+- Confirm that the database and application are no longer needed before removing them.
+- Check AWS Billing and Cost Management for actual charges.
 
-## Development Setup
+Stopping an EC2 instance does not automatically stop charges for every associated resource.
 
-```bash
-# Clone repository
-git clone https://github.com/yourusername/your-repo.git
+## Related Documentation
 
-# Install dependencies
-mvn install
+- [`README.md`](README.md) — Project overview and entry point.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — Contribution guidelines.
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) — Community standards.
+- [`SECURITY.md`](SECURITY.md) — Security reporting and policy.
+- [`docs/AWS-3-Tier-Deployment.md`](docs/AWS-3-Tier-Deployment.md) — Detailed AWS deployment guide.
 
-# Run tests
-mvn test
-```
+## Contributing
 
----
+Contributions that improve application reliability, security, documentation, testing, or deployment are welcome.
 
-## ≡ƒ¢á∩╕Å Author & Community
+1. Review `CONTRIBUTING.md`.
+2. Create a separate branch for your changes.
+3. Test the changes where practical.
+4. Run `git diff --check`.
+5. Review your changes and ensure no secrets are included.
+6. Commit your changes and open a pull request according to the repository's contribution process.
 
-This project is maintained by **[Harshhaa](https://github.com/NotHarshhaa)** ≡ƒÆí.
-Your feedback and contributions are welcome!
+## Disclaimer
 
-≡ƒôº **Connect with me:**
-- **GitHub**: [@NotHarshhaa](https://github.com/NotHarshhaa)
-- **Blog**: [ProDevOpsGuy](https://blog.prodevopsguytech.com)
-- **Telegram Community**: [Join Here](https://t.me/prodevopsguy)
-- **LinkedIn**: [Harshhaa Vardhan Reddy](https://www.linkedin.com/in/harshhaa-vardhan-reddy/)
+This project is an educational deployment and a demonstration of AWS and DevOps practices. It should not be considered production-ready solely because it runs successfully.
 
----
-
-## Γ¡É Support the Project
-
-If you found this project helpful, please consider:
-- **Starring** Γ¡É the repository
-- **Sharing** it with your network
-- **Contributing** to its improvement
-
-### ≡ƒôó Stay Connected
-
-![Follow Me](https://imgur.com/2j7GSPs.png)
-
-> [!Important]
-> This documentation is continuously evolving. For the latest updates, please check the repository regularly.
+A production deployment requires additional validation of availability, backups, access control, encryption, monitoring, disaster recovery, application security, and operational procedures.
