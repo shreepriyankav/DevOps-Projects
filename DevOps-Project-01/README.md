@@ -1,4 +1,4 @@
-# Deploy Java Application on AWS 3-Tier Architecture
+﻿# Deploy Java Application on AWS 3-Tier Architecture
 
 ![AWS Architecture](https://imgur.com/b9iHwVc.png)
 
@@ -518,12 +518,12 @@ mvn test
 
 ---
 
-## 🛠️ Author & Community
+## ≡ƒ¢á∩╕Å Author & Community
 
-This project is maintained by **[Harshhaa](https://github.com/NotHarshhaa)** 💡.
+This project is maintained by **[Harshhaa](https://github.com/NotHarshhaa)** ≡ƒÆí.
 Your feedback and contributions are welcome!
 
-📧 **Connect with me:**
+≡ƒôº **Connect with me:**
 - **GitHub**: [@NotHarshhaa](https://github.com/NotHarshhaa)
 - **Blog**: [ProDevOpsGuy](https://blog.prodevopsguytech.com)
 - **Telegram Community**: [Join Here](https://t.me/prodevopsguy)
@@ -531,14 +531,14 @@ Your feedback and contributions are welcome!
 
 ---
 
-## ⭐ Support the Project
+## Γ¡É Support the Project
 
 If you found this project helpful, please consider:
-- **Starring** ⭐ the repository
+- **Starring** Γ¡É the repository
 - **Sharing** it with your network
 - **Contributing** to its improvement
 
-### 📢 Stay Connected
+### ≡ƒôó Stay Connected
 
 ![Follow Me](https://imgur.com/2j7GSPs.png)
 
