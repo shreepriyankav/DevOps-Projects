@@ -1,230 +1,216 @@
 # Security Policy 🛡️
 
-> [!IMPORTANT]
-> _This document outlines the security practices and procedures for the **Real-World DevOps/Cloud Projects For Learning** repository. We take security seriously and are committed to maintaining a safe environment for all users and contributors._
+## Overview
 
----
+The **DevOps-Projects** repository contains educational projects covering AWS, DevOps, cloud infrastructure, Java application deployment, CI/CD, containerization, monitoring, and automation.
 
-## 🔍 **Security Scope**
+Security is an important part of these projects. We aim to demonstrate secure development and deployment practices while helping learners understand common infrastructure and application security risks.
 
-This repository contains educational DevOps projects and infrastructure configurations. While these projects are designed for learning purposes, we still maintain security best practices to ensure:
+These projects are primarily intended for learning and demonstration. They should be reviewed and appropriately hardened before being used in production environments.
 
-- **Safe Code Examples**: All code examples follow security best practices
-- **Secure Infrastructure Templates**: Infrastructure as Code (IaC) templates implement security controls
-- **No Sensitive Data**: No secrets, API keys, or sensitive credentials are stored in this repository
-- **Educational Security**: Security concepts are properly explained and demonstrated
+## 🔍 Security Scope
 
-![Security Scope](https://img.shields.io/badge/🔍%20Security%20Scope-Educational%20Projects%20with%20Security%20Focus-blue?style=for-the-badge&logo=security&logoColor=white)
+This policy covers security concerns involving:
 
----
+- Source code and application configuration.
+- AWS infrastructure and network configuration.
+- Database connectivity and credential management.
+- CI/CD pipelines and build processes.
+- Docker images and container configurations where applicable.
+- Project documentation, deployment scripts, and infrastructure templates.
+- Dependencies and security scanning configurations.
 
-## 🚨 **Reporting Security Vulnerabilities**
+Security controls may differ between projects. Do not assume that every project implements every security feature described in this document.
 
-> [!CAUTION]
-> _If you discover a security vulnerability, please report it responsibly rather than creating a public issue._
+## 🚨 Reporting a Security Vulnerability
 
-### **How to Report**
+If you discover a potential security vulnerability, **do not disclose exploit details or sensitive information in a public GitHub issue**.
 
-1. **Email**: Send detailed information to **[security@prodevopsguytech.com]**
-2. **Private Issue**: Create a private GitHub issue with the "security" label
-3. **Include Details**: Provide as much information as possible including:
-   - Affected project/component
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if available)
+### How to Report
 
-### **Response Time**
+1. Contact the repository owner privately through the contact information available on the [GitHub profile](https://github.com/shreepriyankav).
+2. Include the affected project or component.
+3. Describe the potential vulnerability and its impact.
+4. Provide reproducible steps or relevant logs, with credentials and sensitive information removed.
+5. Suggest a possible mitigation if you have one.
 
-- **Critical**: Within 24 hours
-- **High**: Within 48 hours
-- **Medium**: Within 72 hours
-- **Low**: Within 1 week
+Do not include passwords, AWS access keys, private keys, database credentials, or personal information in a report unless there is a secure and necessary reason to do so.
 
-![Report Vulnerability](https://img.shields.io/badge/🚨%20Report%20Vulnerability-Responsible%20Disclosure-red?style=for-the-badge&logo=bug&logoColor=white)
+### Response and Remediation
 
----
+Reports will be reviewed as reasonably possible based on their severity, impact, and available information.
 
-## ✅ **Security Best Practices in Our Projects**
+The review process may include:
 
-> [!NOTE]
-> _All DevOps projects in this repository incorporate security best practices appropriate for educational purposes._
+- Assessing the reported risk.
+- Validating and reproducing the issue safely.
+- Developing and testing a fix or mitigation.
+- Updating affected code and documentation.
+- Communicating relevant remediation information when appropriate.
 
-### **Infrastructure Security**
+No fixed response or resolution time is guaranteed. Critical issues will be prioritized according to their impact and urgency.
 
-- **VPC Security**: Proper network segmentation and security groups
-- **IAM Policies**: Principle of least privilege access controls
-- **Encryption**: Data encryption at rest and in transit where applicable
-- **Monitoring**: Security logging and monitoring implementations
+## 🔐 Security Practices
 
-### **Application Security**
+### 1. AWS Infrastructure Security
 
-- **Container Security**: Secure Docker configurations and scanning
-- **Dependency Management**: Regular dependency updates and vulnerability scanning
-- **Code Quality**: Static code analysis and security testing
-- **Secrets Management**: Proper secrets handling practices
+For AWS-based projects, including the Nexora Java Login Application:
 
-### **CI/CD Security**
+- Use security groups to restrict network access.
+- Apply least-privilege IAM permissions.
+- Keep internal application and database services private where practical.
+- Avoid exposing administrative ports or backend application ports publicly.
+- Review subnet routing and inbound access rules before deployment.
+- Monitor resource configuration and unexpected infrastructure changes.
 
-- **Pipeline Security**: Secure Jenkins/GitHub Actions configurations
-- **Artifact Security**: Container image scanning and signing
-- **Access Control**: Secure repository and pipeline access management
-- **Audit Trails**: Comprehensive logging and audit capabilities
+### 2. Application Security
 
-![Security Practices](https://img.shields.io/badge/✅%20Security%20Practices-Best%20Practices%20Implemented-green?style=for-the-badge&logo=checkmark&logoColor=white)
+- Keep database credentials outside source code.
+- Use environment variables or an appropriate secrets-management solution.
+- Use parameterized SQL queries to reduce SQL injection risk.
+- Validate application input and handle errors appropriately.
+- Review dependencies and apply relevant security updates.
+- Avoid logging passwords, tokens, or other sensitive information.
 
----
+### 3. Database Security
 
-## 🔧 **Security Tools & Technologies**
+- Restrict database access to authorized application resources.
+- Use dedicated database accounts with limited permissions.
+- Protect database credentials and rotate them when necessary.
+- Review encryption, backups, and retention settings.
+- Avoid exposing database endpoints directly to the public internet.
 
-Our projects demonstrate various security tools and technologies:
+### 4. CI/CD and Container Security
 
-| Category | Tools Demonstrated |
-|----------|-------------------|
-| **Container Security** | Trivy, Clair, Anchore, Docker Security Scanning |
-| **Infrastructure Security** | Terraform Security Modules, AWS Security Hub |
-| **Code Security** | SonarQube, OWASP Dependency Check, SAST/DAST |
-| **Secrets Management** | AWS Secrets Manager, Azure Key Vault, HashiCorp Vault |
-| **Monitoring** | Prometheus, Grafana, ELK Stack for security monitoring |
-| **Compliance** | Checkov, tfsec, AWS Config Rules |
+Where applicable to a project:
 
-![Security Tools](https://img.shields.io/badge/🔧%20Security%20Tools-Comprehensive%20Toolchain-orange?style=for-the-badge&logo=tools&logoColor=white)
+- Protect repository and pipeline credentials.
+- Store CI/CD secrets in appropriate secret stores.
+- Review third-party actions, plugins, and dependencies.
+- Scan container images and dependencies for known vulnerabilities.
+- Avoid embedding credentials in Docker images or build artifacts.
+- Restrict deployment permissions to authorized users and workflows.
 
----
+Security tools such as Jenkins, GitHub Actions, SonarQube, Trivy, and OWASP Dependency-Check may be used in relevant projects. Their presence and configuration must be verified for each project.
 
-## 🚫 **What We DON'T Store**
+## 🛑 Sensitive Information We Must Not Commit
 
-> [!IMPORTANT]
-> _For security reasons, this repository never contains:_
+Do not commit:
 
-- **API Keys** or **Access Tokens**
-- **Database Credentials** or **Passwords**
-- **Private SSH Keys** or **Certificates**
-- **Personal Identifiable Information (PII)**
-- **Production Secrets** or **Configuration Data**
+- AWS access keys or secret access keys.
+- Database usernames and passwords intended to remain confidential.
+- Private SSH keys, private certificates, or private key material.
+- Access tokens, API keys, or session secrets.
+- Populated `.env` files containing secrets.
+- Sensitive personal information.
+- Production configuration containing confidential values.
 
-All sensitive configurations use:
-- Environment variables
-- Secret management services
-- Configuration templates with placeholders
-- `.env.example` files for reference
+Use placeholders in documentation and examples.
 
-![No Sensitive Data](https://img.shields.io/badge/🚫%20No%20Sensitive%20Data-Clean%20Repository-darkred?style=for-the-badge&logo=shield&logoColor=white)
+For example:
 
----
+```text
+DB_URL=jdbc:mysql://YOUR_PRIVATE_RDS_ENDPOINT:3306/UserDB
+DB_USERNAME=YOUR_DATABASE_USERNAME
+DB_PASSWORD=YOUR_DATABASE_PASSWORD
+```
 
-## 🔄 **Security Update Process**
+These are illustrative placeholders, not real credentials.
 
-### **Regular Maintenance**
+Environment variables help separate configuration from source code, but they are not a complete secrets-management solution. Protect access to the environment and use an appropriate secrets manager when required.
 
-- **Monthly**: Dependency and security tool updates
-- **Quarterly**: Security review of all project templates
-- **Annually**: Comprehensive security audit and improvements
+## ⚠️ If a Secret Is Exposed
 
-### **Vulnerability Response**
+If a credential is accidentally committed or published:
 
-1. **Assessment**: Evaluate reported vulnerability
-2. **Validation**: Reproduce and confirm the issue
-3. **Fix**: Develop and test security patches
-4. **Deploy**: Update affected projects and documentation
-5. **Communicate**: Notify community of security updates
+1. Revoke or rotate the exposed credential immediately.
+2. Assess whether unauthorized access may have occurred.
+3. Review relevant AWS, application, and database activity.
+4. Remove the exposed value from the repository and affected configuration.
+5. Review Git history and any copies or logs that may retain the secret.
+6. Update the affected deployment and verify that the replacement credential works.
 
-![Update Process](https://img.shields.io/badge/🔄%20Update%20Process-Regular%20Security%20Maintenance-blueviolet?style=for-the-badge&logo=sync&logoColor=white)
+Deleting a secret from the latest version of a file does not invalidate it and may not remove it from Git history. **Rotate the credential first.**
 
----
+## 🧪 Security Tools
 
-## 🎓 **Educational Security Focus**
+Depending on the project, security checks may include:
 
-> [!NOTE]
-> _This repository prioritizes security education while maintaining safe practices._
+| Category | Examples |
+|---|---|
+| Static code analysis | SonarQube |
+| Container vulnerability scanning | Trivy |
+| Dependency analysis | OWASP Dependency-Check |
+| Infrastructure security | IAM and security group reviews |
+| Application and infrastructure monitoring | CloudWatch, Prometheus, Grafana where configured |
 
-### **Learning Objectives**
+Tool availability does not guarantee that an application or infrastructure deployment is secure. Findings must be reviewed and addressed appropriately.
 
-- **Security by Design**: Building security into DevOps workflows
-- **Threat Modeling**: Understanding and mitigating security risks
-- **Compliance**: Implementing security controls and standards
-- **Automation**: Security automation in CI/CD pipelines
+## 🔄 Security Maintenance
 
-### **Safe Learning Environment**
+Security maintenance may include:
 
-- **Sandboxed Examples**: Isolated learning environments
-- **Best Practice Demonstrations**: Real-world security implementations
-- **Step-by-Step Guidance**: Clear security implementation instructions
-- **Common Pitfalls**: Security mistakes to avoid
+- Reviewing dependencies and known vulnerabilities.
+- Updating application and operating system packages.
+- Reviewing AWS security groups and IAM permissions.
+- Validating credential-handling practices.
+- Testing fixes for reported vulnerabilities.
+- Updating security-related documentation.
 
-![Educational Focus](https://img.shields.io/badge/🎓%20Educational%20Focus-Security%20Learning%20Hub-brightgreen?style=for-the-badge&logo=graduation-cap&logoColor=white)
+Reviews should be performed when relevant changes occur and periodically as project maintenance permits. This policy does not imply that automated scans or scheduled audits run continuously.
 
----
+## 🎓 Educational Use and Production Readiness
 
-## 📞 **Security Contacts**
+These projects are designed to support learning and practical experimentation.
 
-### **Primary Security Contact**
+Before production use:
 
-- **Email**: [security@prodevopsguytech.com]
-- **Response Time**: Within 48 hours for non-critical issues
+- Review the complete application and infrastructure configuration.
+- Validate authentication, authorization, and input validation.
+- Configure HTTPS and appropriate encryption.
+- Establish a secure secrets-management process.
+- Review backups and disaster recovery.
+- Configure suitable logging, monitoring, and alerting.
+- Test access controls and vulnerability mitigations.
+- Evaluate availability, compliance, and operational requirements.
 
-### **Emergency Security Contact**
+Users are responsible for reviewing and adapting the projects to their own environments and security requirements.
 
-- **Email**: [emergency@prodevopsguytech.com]
-- **Response Time**: Within 24 hours for critical security issues
+## 🤝 Shared Responsibility
 
-### **Community Security Discussion**
+### Contributors
 
-- **GitHub Discussions**: [Security Category](https://github.com/NotHarshhaa/DevOps-Projects/discussions/categories/security)
-- **Telegram**: [ProDevOpsGuy Security Channel](https://t.me/prodevopsguy)
+- Follow secure coding and configuration practices.
+- Review security implications before submitting changes.
+- Avoid committing credentials or sensitive information.
+- Report potential vulnerabilities responsibly.
+- Document security-relevant changes.
 
-![Security Contacts](https://img.shields.io/badge/📞%20Security%20Contacts-Multiple%20Contact%20Methods-10b981?style=for-the-badge&logo=phone&logoColor=white)
+### Users
 
----
+- Deploy projects in environments they are authorized to use.
+- Review configurations before exposing services to the internet.
+- Protect credentials and administrative access.
+- Monitor costs, resource usage, and security events.
+- Apply relevant updates and mitigations.
 
-## 🔄 **Security Policy Updates**
-
-This security policy is reviewed and updated:
-
-- **As needed** when new security practices emerge
-- **Annually** for comprehensive review
-- **Immediately** after security incidents or lessons learned
-
-All changes will be communicated through:
-- Repository announcements
-- GitHub discussions
-- Community channels
-
----
-
-## 🤝 **Community Security Responsibility**
-
-> [!TIP]
-> _Security is everyone's responsibility. Here's how you can help:_
-
-### **Contributors**
-
-- Review code for security implications
-- Follow secure coding practices
-- Report potential security issues
-- Share security knowledge and best practices
-
-### **Users**
-
-- Implement projects in secure environments
-- Follow security guidelines provided
-- Report security concerns promptly
-- Continuously learn about security practices
-
-![Community Responsibility](https://img.shields.io/badge/🤝%20Community%20Responsibility-Security%20is%20Everyone's%20Job-ff69b4?style=for-the-badge&logo=users&logoColor=white)
-
----
-
-## 📜 **Security Acknowledgment**
+## 📜 Acknowledgment
 
 By using or contributing to this repository, you acknowledge that:
 
-1. These are **educational projects** and should be adapted for production use
-2. Security is a **shared responsibility** between maintainers and users
-3. You will **report security issues** responsibly
-4. You will **follow security best practices** when implementing these projects
+- The projects are educational examples and may require additional hardening.
+- Security controls must be verified rather than assumed.
+- Credentials and sensitive information must be handled securely.
+- Vulnerabilities should be reported responsibly.
+- Deployment decisions must account for the security requirements of the target environment.
+
+## 🔗 Related Documentation
+
+- [DevOps-Projects Repository](https://github.com/shreepriyankav/DevOps-Projects)
+- [Project Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contribution Guidelines](CONTRIBUTING.md)
+- [Nexora AWS 3-Tier Deployment Guide](docs/AWS-3-Tier-Deployment.md)
 
 ---
 
-**Thank you for helping us maintain a secure learning environment!** 🛡️
-
-![Security Thank You](https://img.shields.io/badge/🙏%20Thank%20You-Helping%20Keep%20DevOps%20Secure-purple?style=for-the-badge&logo=heart&logoColor=white)
+**Security is a shared responsibility.** Thank you for helping make DevOps-Projects safer and more reliable for everyone. 🛡️
