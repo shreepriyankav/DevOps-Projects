@@ -1,12 +1,11 @@
-﻿package com.dpt.demo;
+
+package com.dpt.demo;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.websocket.Session;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -17,63 +16,65 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class login {
 
-	@Value("${spring.datasource.url}")
-	private String url;
+    @Value("${spring.datasource.url}")
+    private String url;
 
-	@Value("${spring.datasource.username}")
-	private String DBusername;
+    @Value("${spring.datasource.username}")
+    private String dbUsername;
 
-	@Value("${spring.datasource.password}")
-	private String DBpassword;
+    @Value("${spring.datasource.password}")
+    private String dbPassword;
 
-	private String userId = "";
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ModelAndView login(String userName, String password) {
 
-	private String errorMessage="";
+        String userId = null;
+        String errorMessage = "Invalid username or password.";
 
-	@RequestMapping(value = "login", method = RequestMethod.POST)
-	public ModelAndView login(String userName, String password) throws ClassNotFoundException {
+        if (userName == null || userName.trim().isEmpty()
+                || password == null || password.isEmpty()) {
+            ModelAndView mv = new ModelAndView("login");
+            mv.addObject("errorMessage", errorMessage);
+            return mv;
+        }
 
+        String query =
+                "SELECT * FROM Employee WHERE username = ? AND password = ?";
 
-		Class.forName("com.mysql.jdbc.Driver");
-		// validate user credentials
-		String query = "select * from Employee where username='" + userName + "' and password='"+password+"'";
-		try (Connection con = DriverManager.getConnection(url, DBusername, DBpassword);
-				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery(query)) {
-			if (rs.next()) {
-				System.out.println(
-						rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3) + " " + rs.getString(4));
-				userId = rs.getString(4);
-			}
-		} catch (SQLException ex) {
-			System.out.println(ex.getMessage());
-			errorMessage=ex.getMessage();
-		}
+        try (Connection con =
+                     DriverManager.getConnection(url, dbUsername, dbPassword);
+             PreparedStatement ps = con.prepareStatement(query)) {
 
-		ModelAndView mv;
-		if (userId != "")
-		{
-			mv = new ModelAndView("home");
-			mv.addObject("email", userId);
-		}
-		else
-		{
+            ps.setString(1, userName.trim());
+            ps.setString(2, password);
 
-			mv = new ModelAndView("login");
-			mv.addObject("errorMessage", errorMessage);
-		}
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Preserve the existing application's fourth-column user ID.
+                    userId = rs.getString(4);
+                }
+            }
 
-		return mv;
-	}
+        } catch (SQLException ex) {
+            // Do not expose database details to the user.
+            System.err.println("Database login operation failed: "
+                    + ex.getSQLState());
+            errorMessage = "Unable to process login. Try again later.";
+        }
 
+        if (userId != null && !userId.isEmpty()) {
+            ModelAndView mv = new ModelAndView("home");
+            mv.addObject("email", userId);
+            return mv;
+        }
 
+        ModelAndView mv = new ModelAndView("login");
+        mv.addObject("errorMessage", errorMessage);
+        return mv;
+    }
 
-	@RequestMapping(value = "login", method = RequestMethod.GET)
-	public ModelAndView registerform()
-	{
-		ModelAndView mv=new ModelAndView("login");
-
-		return mv;
-	}
-
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public ModelAndView registerform() {
+        return new ModelAndView("login");
+    }
 }
